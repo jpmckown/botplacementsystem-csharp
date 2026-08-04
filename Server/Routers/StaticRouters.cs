@@ -4,14 +4,14 @@ using BotPlacementSystemServer.Models;
 using BotPlacementSystemServer.Service;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Models.Eft.Match;
-using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Utils;
 
 namespace BotPlacementSystemServer.Routers;
 
-[Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
+[Injectable(TypePriority = OnLoadOrder.Preload)]
 public class StaticRouters : StaticRouter
 {
     private static JsonUtil _jsonUtil;
@@ -52,7 +52,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionId,
-                    output
+                    output,
+                    cancellationToken
                 ) =>
                 {
                     var data = (StartLocalRaidRequestData)info;
@@ -67,7 +68,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionID,
-                    output
+                    output,
+                    cancellationToken
                 ) =>
                 {
                     if (!_raidLifecycleService.CacheRebuilt && !string.IsNullOrEmpty(_raidLifecycleService.CurrentMap))
@@ -84,7 +86,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionID,
-                    output
+                    output,
+                    cancellationToken
                 ) => await SaveBossTrackingData(info)
             ),
             new RouteAction("/botplacementsystem/load",
@@ -92,7 +95,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionID,
-                    output
+                    output,
+                    cancellationToken
                 ) => await new ValueTask<string>(_jsonUtil.Serialize(_bossTrackingData))
             )
         ];

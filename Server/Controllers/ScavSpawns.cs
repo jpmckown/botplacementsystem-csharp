@@ -1,8 +1,8 @@
 ﻿using BotPlacementSystemServer.Globals;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 using SPTarkov.Server.Core.Utils.Collections;
@@ -14,7 +14,7 @@ public class ScavSpawns(
     ISptLogger<ScavSpawns> logger,
     ICloner cloner,
     RandomUtil randomUtil,
-    DatabaseService databaseService)
+    LocationTable locationTable)
 {
     public List<Wave> GetCustomMapData(string location)
     {
@@ -81,7 +81,7 @@ public class ScavSpawns(
         var scavWaveSpawnInfo = new List<Wave>();
 
 
-        if (!databaseService.GetLocations().GetDictionary().TryGetValue(databaseService.GetLocations().GetMappedKey(location), out var locationData))
+        if (!locationTable.GetDictionary().TryGetValue(locationTable.GetMappedKey(location), out var locationData))
         {
             logger.Error($"unable to find location: {location}");
             return scavWaveSpawnInfo;

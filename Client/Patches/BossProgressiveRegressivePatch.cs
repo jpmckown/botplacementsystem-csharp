@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Threading;
 using BotPlacementSystemClient.Spawning;
@@ -16,7 +16,7 @@ internal class BossProgressiveRegressivePatch : ModulePatch
     }
 
     [PatchPostfix]
-    private static void PatchPostfix(BotZone zone, BotCreationDataClass data, Action<BotOwner> callback, CancellationToken cancellationToken)
+    private static void PatchPostfix(BotZone zone, BotCreationData data, Action<BotOwner> callback, CancellationToken cancellationToken)
     {
         if (!data.Profiles[0].Info.Settings.Role.IsBoss())
         {

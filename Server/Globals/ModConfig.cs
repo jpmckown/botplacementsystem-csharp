@@ -6,14 +6,14 @@ using BotPlacementSystemServer.Models;
 using BotPlacementSystemServer.Models.Enums;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
+using SPTarkov.Server.Core.Helpers.Server;
 using SPTarkov.Server.Core.Loaders;
-using SPTarkov.Server.Core.Models.Utils;
+using SPTarkov.Common.Models.Logging;
 using SPTarkov.Server.Core.Utils;
 
 namespace BotPlacementSystemServer.Globals;
 
-[Injectable (InjectionType.Singleton, TypePriority = OnLoadOrder.PreSptModLoader)]
+[Injectable (InjectionType.Singleton, TypePriority = OnLoadOrder.Preload)]
 public class ModConfig : IOnLoad
 {
     private static JsonUtil _jsonUtil;
@@ -46,7 +46,7 @@ public class ModConfig : IOnLoad
         _logger = logger;
     }
     
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken cancellationToken)
     {
         var configPath = Path.Combine(_modPath, "config.json");
         var defaultConfigPath = Path.Combine(_modPath, "Defaults", "config.default.json");

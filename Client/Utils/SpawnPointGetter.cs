@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Comfort.Common;
 using EFT;
+using EFT.CameraControl;
 using EFT.Game.Spawning;
 using UnityEngine;
 
@@ -38,11 +39,11 @@ public class SpawnPointGetter : MonoBehaviour
     private void Awake()
     {
         // If DLSS or FSR are enabled, set a screen scale value
-        if (CameraClass.Instance.SSAA.isActiveAndEnabled)
+        if (CameraManager.Instance.SSAA.isActiveAndEnabled)
         {
             _screenScale =
-                (float)CameraClass.Instance.SSAA.GetOutputWidth()
-                / (float)CameraClass.Instance.SSAA.GetInputWidth();
+                (float)CameraManager.Instance.SSAA.GetOutputWidth()
+                / (float)CameraManager.Instance.SSAA.GetInputWidth();
             // Plugin.Log.LogDebug($"DLSS or FSR is enabled, scale screen offsets by {_screenScale}");
         }
 

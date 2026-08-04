@@ -1,11 +1,11 @@
-﻿using System.Reflection;
+using System.Reflection;
 using BotPlacementSystemServer.Controllers;
 using HarmonyLib;
 using SPTarkov.Reflection.Patching;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Spt.Location;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.InRaid;
 
 namespace BotPlacementSystemServer.Patches;
 

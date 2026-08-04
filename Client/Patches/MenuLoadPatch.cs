@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using BotPlacementSystemClient.Spawning;
 using Comfort.Common;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using SPT.Reflection.Utils;
@@ -16,7 +17,7 @@ public class MenuLoadPatch : ModulePatch
     {
         Type type = PatchConstants.EftTypes.Single(
             t => !t.IsAbstract &&
-                 typeof(ProfileEndpointFactoryAbstractClass).IsAssignableFrom(t) &&
+                 typeof(ClientBackendSession).IsAssignableFrom(t) &&
                  t.GetMethod("RequestBuilds") != null);
         return AccessTools.Method(type, "RequestBuilds");
     }

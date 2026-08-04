@@ -2,7 +2,7 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Servers;
+using SPTarkov.Server.Core.Models.Spt.Tables;
 using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace BotPlacementSystemServer.Controllers;
@@ -10,12 +10,14 @@ namespace BotPlacementSystemServer.Controllers;
 [Injectable]
 public class VanillaAdjustments(
     ICloner cloner,
-    ConfigServer configServer,
-    DatabaseServer databaseServer)
+    LocationConfig locationConfig,
+    PmcConfig pmcConfig,
+    BotConfig botConfig,
+    BotTable botTable)
 {
-    private readonly LocationConfig _locationConfig = configServer.GetConfig<LocationConfig>();
-    private readonly PmcConfig _pmcConfig = configServer.GetConfig<PmcConfig>();
-    private readonly BotConfig _botConfig = configServer.GetConfig<BotConfig>();
+    private readonly LocationConfig _locationConfig = locationConfig;
+    private readonly PmcConfig _pmcConfig = pmcConfig;
+    private readonly BotConfig _botConfig = botConfig;
 
     public void DisableVanillaSettings()
     {
@@ -169,7 +171,7 @@ public class VanillaAdjustments(
             }
         }
 
-        var databaseBots = databaseServer.GetTables().Bots.Types;
+        var databaseBots = botTable.Types;
         foreach (var (bot, data) in databaseBots)
         {
             if (bot.Contains("assault") || bot.Contains("marksman"))

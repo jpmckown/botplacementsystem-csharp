@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -78,7 +78,7 @@ internal class Utility
         BotsSpawnedPerPlayer = 0.0;
             
         // Recache spawn points now
-        _allSpawnPoints = SpawnPointManagerClass.CreateFromScene().ToList();
+        _allSpawnPoints = SpawnPointsCollection.CreateFromScene().ToList();
     
         PlayerSpawnPoints = _allSpawnPoints
             .Where(x => x.Categories.ContainPlayerCategory() && x.Infiltration != null)

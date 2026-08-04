@@ -3,17 +3,22 @@ using SPTarkov.Server.Web;
 
 namespace BotPlacementSystemServer;
 
-public record ModMetadata : AbstractModMetadata, IModWebMetadata
+public record ModMetadata : IModMetadata, IModBlazorMetadata
 {
-    public override string ModGuid { get; init; } = "com.acidphantasm.botplacementsystem";
-    public override string Name { get; init; } = "Acid's Bot Placement System";
-    public override string Author { get; init; } = "acidphantasm";
-    public override List<string>? Contributors { get; init; }
-    public override SemanticVersioning.Version Version { get; init; } = new("2.0.19");
-    public override SemanticVersioning.Range SptVersion { get; init; } = new("~4.0.3");
-    public override List<string>? Incompatibilities { get; init; }
-    public override Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
-    public override string? Url { get; init; }
-    public override bool? IsBundleMod { get; init; }
-    public override string? License { get; init; } = "BY-NC-ND 4.0";
+    public string ModGuid { get; init; } = "com.acidphantasm.botplacementsystem";
+    public string Name { get; init; } = "Acid's Bot Placement System";
+    public string Author { get; init; } = "acidphantasm";
+    public List<string>? Contributors { get; init; }
+    public SemanticVersioning.Version Version { get; init; } = new("2.1.0");
+    public SemanticVersioning.Range SptVersion { get; init; } = new("~4.1.1");
+    public bool HasPrepatcher { get; init; } = false;
+    public List<string>? Incompatibilities { get; init; }
+    public Dictionary<string, SemanticVersioning.Range>? ModDependencies { get; init; }
+    public string? Url { get; init; }
+    public string? License { get; init; } = "BY-NC-ND 4.0";
+
+    // IModBlazorMetadata - registers the mod's Blazor pages/assets with the SPT web UI
+    public string WWWRootUrl { get; init; } = "acidphantasm-botplacementsystem";
+    public string HomePage { get; init; } = "/botplacementsystem";
+    public string HomePageDescription { get; init; } = "Configure bot, boss and PMC spawns";
 }

@@ -1,7 +1,7 @@
-﻿using System.Reflection;
+using System.Reflection;
 using HarmonyLib;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.Services;
+using SPTarkov.Server.Core.Services.Server;
 
 namespace BotPlacementSystemServer.Patches;
 

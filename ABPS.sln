@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "acidphantasm-botplacementsystem", "Client\acidphantasm-botplacementsystem.csproj", "{44A20FAB-611C-452B-9D0F-CB4AC7BB0B9C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "acidphantasm-botplacementsystem.Client", "Client\acidphantasm-botplacementsystem.csproj", "{44A20FAB-611C-452B-9D0F-CB4AC7BB0B9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "acidphantasm-botplacementsystem", "Server\acidphantasm-botplacementsystem.csproj", "{1B0D3901-C812-401B-A204-7ECA596608AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "acidphantasm-botplacementsystem.Server", "Server\acidphantasm-botplacementsystem.csproj", "{1B0D3901-C812-401B-A204-7ECA596608AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
