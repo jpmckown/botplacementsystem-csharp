@@ -19,7 +19,7 @@ internal class TryToSpawnInZonePatch : ModulePatch
     }
 
     [PatchPrefix]
-    private static void PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationDataClass data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
+    private static void PatchPrefix(BotSpawner __instance, BotZone botZone, BotCreationData data, bool withCheckMinMax, bool newWave, ref List<ISpawnPoint> pointsToSpawn, bool forcedSpawn = false)
     {
         try
         {
@@ -100,7 +100,7 @@ internal class TryToSpawnInZonePatch : ModulePatch
             // fallback to vanilla
             allSpawnPoints = botZone.SpawnPoints
                 .Where(x => x.Categories == ESpawnCategoryMask.All || x.Categories.ContainBotCategory())
-                .OrderBy(_ => GClass856.Random(0f, 1f))
+                .OrderBy(_ => MyExtensions.Random(0f, 1f))
                 .ToList();
         }
 

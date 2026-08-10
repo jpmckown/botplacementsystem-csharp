@@ -11,6 +11,8 @@ using UnityEngine;
 
 namespace BotPlacementSystemClient.Patches;
 
+using JsonType;
+
 internal class NonWavesSpawnSystemPatch : ModulePatch
 {
     private static float _nextDespawnCheckTime = 0f;
@@ -23,38 +25,38 @@ internal class NonWavesSpawnSystemPatch : ModulePatch
     [PatchPrefix]
     private static bool PatchPrefix(
         NonWavesSpawnScenario __instance,
-        ref BotsController ___botsController_0,
-        ref AbstractGame ___abstractGame_0,
-        ref LocationSettingsClass.Location ___location_0,
-        ref GClass1881<BotDifficulty> ___gclass1881_0,
-        ref GClass1881<WildSpawnType> ___gclass1881_1,
-        ref GClass1876 ___gclass1876_0,
-        ref bool ___bool_0,
-        ref bool ___bool_1,
-        ref bool ___bool_2,
-        ref float ___nullable_0,
-        ref float ___float_2,
-        ref float ___float_0)
+        ref BotsController ____botsController,
+        ref AbstractGame ____game,
+        ref LocationSettings.Location ____location,
+        ref WDictionary<BotDifficulty> ____botDifficultiesWights,
+        ref WDictionary<WildSpawnType> ____wildTypesWeights,
+        ref NonWaveGroupScenario ____groupScenario,
+        ref bool ____maxWasReached,
+        ref bool ____started,
+        ref bool ____isSpawnTime,
+        ref float ____botSpawnTime,
+        ref float ____botSpawnPeriodCheck,
+        ref float ____lastCheckTime)
     {
-        ref var isActive = ref ___bool_1;
-        ref var isAtBotCap = ref ___bool_0;
-        ref var isInSpawnWindow = ref ___bool_2;
-        ref var nextWindowToggleTime = ref ___nullable_0;
-        ref var spawnAttemptInterval = ref ___float_2;
-        ref var lastSpawnAttemptTime = ref ___float_0;
-        ref GClass1881<BotDifficulty> difficultyWeights = ref ___gclass1881_0;
+        ref var isActive = ref ____started;
+        ref var isAtBotCap = ref ____maxWasReached;
+        ref var isInSpawnWindow = ref ____isSpawnTime;
+        ref var nextWindowToggleTime = ref ____botSpawnTime;
+        ref var spawnAttemptInterval = ref ____botSpawnPeriodCheck;
+        ref var lastSpawnAttemptTime = ref ____lastCheckTime;
+        ref var difficultyWeights = ref ____botDifficultiesWights;
 
         if (__instance == null || !isActive) return true;
 
-        if (___abstractGame_0.PastTime < (float)___location_0.BotStart || ___abstractGame_0.PastTime > (float)___location_0.BotStop)
+        if (____game.PastTime < (float)____location.BotStart || ____game.PastTime > (float)____location.BotStop)
             return false;
 
-        if (nextWindowToggleTime.Equals(null) || nextWindowToggleTime <= ___abstractGame_0.PastTime)
+        if (nextWindowToggleTime.Equals(null) || nextWindowToggleTime <= ____game.PastTime)
         {
             isInSpawnWindow = !isInSpawnWindow;
-            nextWindowToggleTime = ___abstractGame_0.PastTime + (isInSpawnWindow
-                ? GClass856.Random((float)___location_0.BotSpawnTimeOnMin, (float)___location_0.BotSpawnTimeOnMax)
-                : GClass856.Random((float)___location_0.BotSpawnTimeOffMin, (float)___location_0.BotSpawnTimeOffMax));
+            nextWindowToggleTime = ____game.PastTime + (isInSpawnWindow
+                ? MyExtensions.Random((float)____location.BotSpawnTimeOnMin, (float)____location.BotSpawnTimeOnMax)
+                : MyExtensions.Random((float)____location.BotSpawnTimeOffMin, (float)____location.BotSpawnTimeOffMax));
         }
 
         if (!isInSpawnWindow)
@@ -62,17 +64,17 @@ internal class NonWavesSpawnSystemPatch : ModulePatch
             return false;
         }
 
-        if (___abstractGame_0.PastTime - lastSpawnAttemptTime < spawnAttemptInterval)
+        if (____game.PastTime - lastSpawnAttemptTime < spawnAttemptInterval)
         {
             return false;
         }
-        lastSpawnAttemptTime = ___abstractGame_0.PastTime;
+        lastSpawnAttemptTime = ____game.PastTime;
 
-        var freeSlots = (___botsController_0.MaxCount - Plugin.SoftCap) - ___botsController_0.AliveLoadingDelayedBotsCount;
+        var freeSlots = (____botsController._maxCount - Plugin.SoftCap) - ____botsController.AliveLoadingDelayedBotsCount;
 
         if (isAtBotCap)
         {
-            if (freeSlots < ___location_0.BotSpawnCountStep)
+            if (freeSlots < ____location.BotSpawnCountStep)
             {
                 return false;
             }
@@ -81,12 +83,12 @@ internal class NonWavesSpawnSystemPatch : ModulePatch
         }
         else if (freeSlots <= 0)
         {
-            spawnAttemptInterval = Math.Max((float)___location_0.BotSpawnPeriodCheck, 15f);
-            isAtBotCap = ___botsController_0.MaxCount - ___botsController_0.AliveAndLoadingBotsCount <= 0;
+            spawnAttemptInterval = Math.Max((float)____location.BotSpawnPeriodCheck, 15f);
+            isAtBotCap = ____botsController._maxCount - ____botsController.AliveAndLoadingBotsCount <= 0;
             return false;
         }
             
-        if (Utility.BotsSpawnedPerPlayer >= ___botsController_0.BotLocationModifier.NonWaveSpawnBotsLimitPerPlayerPvE)
+        if (Utility.BotsSpawnedPerPlayer >= ____botsController.BotLocationModifier.NonWaveSpawnBotsLimitPerPlayerPvE)
         {
             return false;
         }
@@ -94,16 +96,16 @@ internal class NonWavesSpawnSystemPatch : ModulePatch
         var mapName = Utility.CurrentLocation;
         if (Utility.CurrentMapZones.Count == 0)
         {
-            Utility.CurrentMapZones = ___botsController_0.BotSpawner.AllBotZones.ToList();
+            Utility.CurrentMapZones = ____botsController.BotSpawner._allBotZones.ToList();
         }
 
-        var botZone = GetValidBotZone(WildSpawnType.assault, 1, ___botsController_0.BotSpawner.AllBotZones, mapName, ___botsController_0);
-        ___botsController_0.ActivateBotsByWave(new BotWaveDataClass
+        var botZone = GetValidBotZone(WildSpawnType.assault, 1, ____botsController.BotSpawner._allBotZones, mapName, ____botsController);
+        ____botsController.ActivateBotsByWave(new SpawnWave
         {
             BotsCount = 1,
             Time = Time.time,
-            Difficulty = ___gclass1881_0.Random(),
-            IsPlayers = GClass856.IsTrue100(Plugin.PScavChance),
+            Difficulty = difficultyWeights.Random(),
+            IsPlayers = MyExtensions.IsTrue100(Plugin.PScavChance),
             Side = EPlayerSide.Savage,
             WildSpawnType = WildSpawnType.assault,
             SpawnAreaName = botZone,
@@ -119,7 +121,7 @@ internal class NonWavesSpawnSystemPatch : ModulePatch
             
         _nextDespawnCheckTime = Time.time + Plugin.DespawnTimer;
         var center = GetPlayerCountAndCenter();
-        DespawnFurthestBots(___botsController_0, center);
+        DespawnFurthestBots(____botsController, center);
 
         return false;
     }
@@ -191,9 +193,9 @@ internal class NonWavesSpawnSystemPatch : ModulePatch
         {
             Utility.CachedNonSnipeZones = allZones.Where(x => !x.SnipeZone).ToList();
         }
-        var botZones = Utility.CachedNonSnipeZones.OrderBy(_ => GClass856.Random(0f, 1f)).ToList();
+        var botZones = Utility.CachedNonSnipeZones.OrderBy(_ => MyExtensions.Random(0f, 1f)).ToList();
 
-        if (Plugin.EnableHotzones && GClass856.IsTrue100(Plugin.HotzoneScavChance) && Utility.MapHotSpots.TryGetValue(location, out var spot))
+        if (Plugin.EnableHotzones && MyExtensions.IsTrue100(Plugin.HotzoneScavChance) && Utility.MapHotSpots.TryGetValue(location, out var spot))
         {
             var hotSpotZone = spot.RandomElement();
             return hotSpotZone;

@@ -1,27 +1,27 @@
 ﻿using System.Reflection;
-using BotPlacementSystemServer.Controllers;
 using BotPlacementSystemServer.Models;
 using BotPlacementSystemServer.Service;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Match;
-using SPTarkov.Server.Core.Models.Utils;
 using SPTarkov.Server.Core.Utils;
 
 namespace BotPlacementSystemServer.Routers;
 
-[Injectable(TypePriority = OnLoadOrder.PreSptModLoader)]
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Helpers.Server;
+
+[Injectable(TypePriority = OnLoadOrder.Routers + 1)]
 public class StaticRouters : StaticRouter
 {
-    private static JsonUtil _jsonUtil;
-    private static HttpResponseUtil _httpResponseUtil;
-    private static RaidLifecycleService _raidLifecycleService;
-    private static string? _modPath;
-    private static string? _savesPath;
-    private static ISptLogger<StaticRouters> _logger;
+    private static JsonUtil _jsonUtil = null!;
+    private static HttpResponseUtil _httpResponseUtil = null!;
+    private static RaidLifecycleService _raidLifecycleService = null!;
+    private static string _modPath = null!;
+    private static string _savesPath = null!;
+    private static ISptLogger<StaticRouters> _logger = null!;
 
-    private static Dictionary<string, Dictionary<string, CustomizedObject>>? _bossTrackingData = null;
+    private static Dictionary<string, Dictionary<string, CustomizedObject>> _bossTrackingData = null!;
 
     public StaticRouters(
         JsonUtil jsonUtil,
@@ -52,7 +52,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionId,
-                    output
+                    output,
+                    token
                 ) =>
                 {
                     var data = (StartLocalRaidRequestData)info;
@@ -67,7 +68,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionID,
-                    output
+                    output,
+                    token
                 ) =>
                 {
                     if (!_raidLifecycleService.CacheRebuilt && !string.IsNullOrEmpty(_raidLifecycleService.CurrentMap))
@@ -84,7 +86,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionID,
-                    output
+                    output,
+                    token
                 ) => await SaveBossTrackingData(info)
             ),
             new RouteAction("/botplacementsystem/load",
@@ -92,7 +95,8 @@ public class StaticRouters : StaticRouter
                     url,
                     info,
                     sessionID,
-                    output
+                    output,
+                    token
                 ) => await new ValueTask<string>(_jsonUtil.Serialize(_bossTrackingData))
             )
         ];

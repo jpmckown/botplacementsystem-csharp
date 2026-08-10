@@ -3,13 +3,14 @@ using BotPlacementSystemServer.Service;
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.DI;
 using SPTarkov.Server.Core.Models.Eft.Common;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Services;
 using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace BotPlacementSystemServer.Controllers;
 
-[Injectable(InjectionType = InjectionType.Singleton, TypePriority = OnLoadOrder.PostDBModLoader + 69420)]
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Models.Spt.Tables;
+
+[Injectable(InjectionType = InjectionType.Singleton, TypePriority = OnLoadOrder.PostLoad + 69420)]
 public class MapSpawns(
     ISptLogger<MapSpawns> logger,
     BossSpawns bossSpawns,
@@ -17,7 +18,7 @@ public class MapSpawns(
     PmcSpawns pmcSpawns,
     VanillaAdjustments vanillaAdjustments,
     ICloner cloner,
-    DatabaseService databaseService,
+    LocationTable locationTable,
     RaidLifecycleService raidLifecycleService)
     : IOnLoad
 {
@@ -42,7 +43,7 @@ public class MapSpawns(
     private readonly Dictionary<string, List<Wave>> _scavMapCache = new();
     private Dictionary<string, Location> _locationData = new();
     
-    public Task OnLoad()
+    public Task OnLoadAsync(CancellationToken token)
     {
         ConfigureInitialData();
         
@@ -54,11 +55,11 @@ public class MapSpawns(
 
     private void ConfigureInitialData()
     {
-        _locationData = databaseService.GetLocations().GetDictionary();
+        _locationData = locationTable.GetDictionary();
         
         foreach (var map in _validMaps)
         {
-            var actualKey = databaseService.GetLocations().GetMappedKey(map);
+            var actualKey = locationTable.GetMappedKey(map);
             _locationData[actualKey].Base.BossLocationSpawn = [];
             _botMapCache[map] = [];
             _scavMapCache[map] = [];
@@ -79,13 +80,13 @@ public class MapSpawns(
             }
 
             vanillaAdjustments.RemoveExistingWaves(_locationData[actualKey].Base);
-            vanillaAdjustments.FixPMCHostility(_locationData[actualKey].Base);
+            vanillaAdjustments.FixPmcHostility(_locationData[actualKey].Base);
             vanillaAdjustments.AdjustNewWaveSettings(_locationData[actualKey].Base);
         }
 
         vanillaAdjustments.CheckAndAddScavBrainTypes();
         vanillaAdjustments.DisableVanillaSettings();
-        vanillaAdjustments.RemoveCustomPMCWaves();
+        vanillaAdjustments.RemoveCustomPmcWaves();
         BuildInitialCache();
     }
 
@@ -101,7 +102,7 @@ public class MapSpawns(
     {
         foreach (var map in _validMaps)
         {
-            var actualKey = databaseService.GetLocations().GetMappedKey(map);
+            var actualKey = locationTable.GetMappedKey(map);
             
             var mapData =
                 bossSpawns.GetCustomMapData(map, _locationData[actualKey].Base.EscapeTimeLimit.GetValueOrDefault());
@@ -122,7 +123,7 @@ public class MapSpawns(
     {
         foreach (var map in _validMaps)
         {
-            var actualKey = databaseService.GetLocations().GetMappedKey(map);
+            var actualKey = locationTable.GetMappedKey(map);
             
             var mapData = pmcSpawns.GetCustomMapData(map,
                 _locationData[actualKey].Base.EscapeTimeLimit.GetValueOrDefault()
@@ -165,7 +166,7 @@ public class MapSpawns(
     {
         foreach (var map in _validMaps)
         {
-            var actualKey = databaseService.GetLocations().GetMappedKey(map);
+            var actualKey = locationTable.GetMappedKey(map);
             _locationData[actualKey].Base.BossLocationSpawn = cloner.Clone(_botMapCache[map]);
             _locationData[actualKey].Base.Waves = cloner.Clone(_scavMapCache[map]);
         }
@@ -186,7 +187,7 @@ public class MapSpawns(
     
     private void BuildBossWavesForMap(string location)
     {
-        var actualKey = databaseService.GetLocations().GetMappedKey(location);
+        var actualKey = locationTable.GetMappedKey(location);
         var mapData = bossSpawns.GetCustomMapData(location, _locationData[actualKey].Base.EscapeTimeLimit.GetValueOrDefault());
         foreach (var spawn in mapData)
         {
@@ -196,7 +197,7 @@ public class MapSpawns(
 
     private void BuildPmcWavesForMap(string location)
     {
-        var actualKey = databaseService.GetLocations().GetMappedKey(location);
+        var actualKey = locationTable.GetMappedKey(location);
         var mapData = pmcSpawns.GetCustomMapData(location, _locationData[actualKey].Base.EscapeTimeLimit.GetValueOrDefault());
         foreach (var spawn in mapData)
         {
@@ -218,7 +219,7 @@ public class MapSpawns(
 
     private void ReplaceOriginalLocationForMap(string location)
     {
-        var actualKey = databaseService.GetLocations().GetMappedKey(location);
+        var actualKey = locationTable.GetMappedKey(location);
         _locationData[actualKey].Base.BossLocationSpawn = cloner.Clone(_botMapCache[location]);
         _locationData[actualKey].Base.Waves = cloner.Clone(_scavMapCache[location]);
     }

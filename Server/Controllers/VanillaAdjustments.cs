@@ -2,28 +2,28 @@
 using SPTarkov.DI.Annotations;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace BotPlacementSystemServer.Controllers;
 
+using SPTarkov.Server.Core.Models.Spt.Tables;
+
 [Injectable]
 public class VanillaAdjustments(
     ICloner cloner,
-    ConfigServer configServer,
-    DatabaseServer databaseServer)
+    LocationConfig locationConfig,
+    PmcConfig pmcConfig,
+    BotConfig botConfig,
+    BotTable botTable)
 {
-    private readonly LocationConfig _locationConfig = configServer.GetConfig<LocationConfig>();
-    private readonly PmcConfig _pmcConfig = configServer.GetConfig<PmcConfig>();
-    private readonly BotConfig _botConfig = configServer.GetConfig<BotConfig>();
 
     public void DisableVanillaSettings()
     {
         // LocationConfig.SplitWaveIntoSingleSpawnSettins.Enabled = false;
-        _locationConfig.RogueLighthouseSpawnTimeSettings.Enabled = false;
-        _locationConfig.AddOpenZonesToAllMaps = false;
-        _locationConfig.AddCustomBotWavesToMaps = false;
-        _locationConfig.EnableBotTypeLimits = false;
+        locationConfig.RogueLighthouseSpawnTimeSettings.Enabled = false;
+        locationConfig.AddOpenZonesToAllMaps = false;
+        locationConfig.AddCustomBotWavesToMaps = false;
+        locationConfig.EnableBotTypeLimits = false;
     }
 
     public void DisableNewSpawnSystem(LocationBase locationBase)
@@ -36,8 +36,9 @@ public class VanillaAdjustments(
 
     public void DisableOldSpawnSystem(LocationBase locationBase)
     {
-        if ((locationBase.Id.ToLowerInvariant() == "laboratory" && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLaboratory) || 
-            (locationBase.Id.ToLowerInvariant() == "labyrinth" && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLabyrinth)) return;
+        if (locationBase.Id.ToLowerInvariant() == "laboratory" && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLaboratory || 
+            (locationBase.Id.Equals("labyrinth", StringComparison.InvariantCultureIgnoreCase) && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLabyrinth)) 
+            return;
         
         locationBase.NewSpawn = true;
         locationBase.OfflineNewSpawn = true;
@@ -47,8 +48,9 @@ public class VanillaAdjustments(
 
     public void EnableAllSpawnSystems(LocationBase locationBase)
     {
-        if ((locationBase.Id.ToLowerInvariant() == "laboratory" && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLaboratory) || 
-            (locationBase.Id.ToLowerInvariant() == "labyrinth" && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLabyrinth)) return;
+        if ((locationBase.Id.Equals("laboratory", StringComparison.InvariantCultureIgnoreCase) && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLaboratory) || 
+            (locationBase.Id.Equals("labyrinth", StringComparison.InvariantCultureIgnoreCase) && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLabyrinth)) 
+            return;
         
         locationBase.NewSpawn = true;
         locationBase.OfflineNewSpawn = true;
@@ -70,15 +72,15 @@ public class VanillaAdjustments(
 
     public void AdjustNewWaveSettings(LocationBase locationBase)
     {
-        if ((locationBase.Id == "laboratory" && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLaboratory) || 
-            (locationBase.Id == "labyrinth" && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLabyrinth)) return;
+        if ((locationBase.Id.Equals("laboratory", StringComparison.InvariantCultureIgnoreCase) && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLaboratory) || 
+            (locationBase.Id.Equals("labyrinth", StringComparison.InvariantCultureIgnoreCase) && !ModConfig.Config.ScavConfig.Waves.AllowScavsOnLabyrinth)) 
+            return;
 
         if (ModConfig.Config.ScavConfig.Waves.EnableCustomTimers && (locationBase.Id.Contains("factory") || locationBase.Id.Contains("labyrinth") || locationBase.Id.Contains("laboratory")))
         {
             // Start-Stop Time for spawns
             locationBase.BotStart = ModConfig.Config.ScavConfig.Waves.StartSpawns;
-            locationBase.BotStop =
-                (int)locationBase.EscapeTimeLimit * 60 - ModConfig.Config.ScavConfig.Waves.StopSpawns;
+            locationBase.BotStop = (int)locationBase.EscapeTimeLimit * 60 - ModConfig.Config.ScavConfig.Waves.StopSpawns;
 
             // Start-Stop wave times for active spawning
             locationBase.BotSpawnTimeOnMin = 45;
@@ -98,8 +100,7 @@ public class VanillaAdjustments(
         {
             // Start-Stop Time for spawns
             locationBase.BotStart = ModConfig.Config.ScavConfig.Waves.StartSpawns;
-            locationBase.BotStop =
-                (int)locationBase.EscapeTimeLimit * 60 - ModConfig.Config.ScavConfig.Waves.StopSpawns;
+            locationBase.BotStop = (int)locationBase.EscapeTimeLimit * 60 - ModConfig.Config.ScavConfig.Waves.StopSpawns;
 
             // Start-Stop wave times for active spawning
             locationBase.BotSpawnTimeOnMin = ModConfig.Config.ScavConfig.Waves.ActiveTimeMin;
@@ -127,18 +128,18 @@ public class VanillaAdjustments(
 
     public void CheckAndAddScavBrainTypes()
     {
-        if (!_botConfig.PlayerScavBrainType.ContainsKey("labyrinth"))
+        if (!botConfig.PlayerScavBrainType.ContainsKey("labyrinth"))
         {
-            _botConfig.PlayerScavBrainType["labyrinth"] = cloner.Clone(_botConfig.PlayerScavBrainType["laboratory"]);
+            botConfig.PlayerScavBrainType["labyrinth"] = cloner.Clone(botConfig.PlayerScavBrainType["laboratory"]);
         }
         
-        if (!_botConfig.AssaultBrainType.ContainsKey("labyrinth"))
+        if (!botConfig.AssaultBrainType.ContainsKey("labyrinth"))
         {
-            _botConfig.AssaultBrainType["labyrinth"] = cloner.Clone(_botConfig.AssaultBrainType["laboratory"]);
+            botConfig.AssaultBrainType["labyrinth"] = cloner.Clone(botConfig.AssaultBrainType["laboratory"]);
         }
     }
 
-    public void FixPMCHostility(LocationBase locationBase)
+    public void FixPmcHostility(LocationBase locationBase)
     {
         var hostility = locationBase.BotLocationModifier?.AdditionalHostilitySettings.ToList();
         if (hostility is not null || hostility.Any())
@@ -169,7 +170,7 @@ public class VanillaAdjustments(
             }
         }
 
-        var databaseBots = databaseServer.GetTables().Bots.Types;
+        var databaseBots = botTable.Types;
         foreach (var (bot, data) in databaseBots)
         {
             if (bot.Contains("assault") || bot.Contains("marksman"))
@@ -186,34 +187,34 @@ public class VanillaAdjustments(
             }
         }
 
-        foreach (var (bot, data) in _pmcConfig.HostilitySettings)
+        foreach (var (bot, data) in pmcConfig.HostilitySettings)
         {
-            if (_pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes is not null)
+            if (pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes is not null)
             {
-                if (!_pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Contains("assault")) 
-                    _pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Add("assault");
+                if (!pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Contains("assault")) 
+                    pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Add("assault");
                 
-                if (!_pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Contains("pmcBEAR")) 
-                    _pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Add("pmcBEAR");
+                if (!pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Contains("pmcBEAR")) 
+                    pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Add("pmcBEAR");
                 
-                if (!_pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Contains("pmcUSEC")) 
-                    _pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Add("pmcUSEC");
+                if (!pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Contains("pmcUSEC")) 
+                    pmcConfig.HostilitySettings[bot].AdditionalEnemyTypes.Add("pmcUSEC");
             }
-            _pmcConfig.HostilitySettings[bot].SavageEnemyChance = 100;
-            _pmcConfig.HostilitySettings[bot].BearEnemyChance = 100;
-            _pmcConfig.HostilitySettings[bot].UsecEnemyChance = 100;
-            _pmcConfig.HostilitySettings[bot].SavagePlayerBehaviour = "AlwaysEnemies";
+            pmcConfig.HostilitySettings[bot].SavageEnemyChance = 100;
+            pmcConfig.HostilitySettings[bot].BearEnemyChance = 100;
+            pmcConfig.HostilitySettings[bot].UsecEnemyChance = 100;
+            pmcConfig.HostilitySettings[bot].SavagePlayerBehaviour = "AlwaysEnemies";
 
-            foreach (var chancedEnemy in _pmcConfig.HostilitySettings[bot].ChancedEnemies)
+            foreach (var chancedEnemy in pmcConfig.HostilitySettings[bot].ChancedEnemies)
             {
                 chancedEnemy.EnemyChance = 100;
             }
         }
     }
     
-    public void RemoveCustomPMCWaves()
+    public void RemoveCustomPmcWaves()
     {
-        _pmcConfig.RemoveExistingPmcWaves = false;
-        _pmcConfig.CustomPmcWaves = new Dictionary<string, List<BossLocationSpawn>>();
+        pmcConfig.RemoveExistingPmcWaves = false;
+        pmcConfig.CustomPmcWaves = new Dictionary<string, List<BossLocationSpawn>>();
     }
 }

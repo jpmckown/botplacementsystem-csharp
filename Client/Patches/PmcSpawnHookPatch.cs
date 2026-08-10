@@ -16,11 +16,11 @@ internal class PmcSpawnHookPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(BossSpawnerClass), nameof(BossSpawnerClass.method_2));
+        return AccessTools.Method(typeof(BotBossSpawn), nameof(BotBossSpawn.TrySpawn));
     }
 
     [PatchPrefix]
-    private static bool PatchPrefix(BossSpawnerClass __instance, BossLocationSpawn wave, BotSpawnParams spawnParams, BotDifficulty difficulty, int followersCount, BotCreationDataClass creationData, ref bool __result)
+    private static bool PatchPrefix(BotBossSpawn __instance, BossLocationSpawn wave, BotSpawnParams spawnParams, BotDifficulty difficulty, int followersCount, BotCreationData creationData, ref bool __result)
     {
         try
         {
@@ -77,10 +77,10 @@ internal class PmcSpawnHookPatch : ModulePatch
                 if (validSpawnLocations.Count >= escortPointCount)
                 {
                     var botZone =
-                        __instance.BotSpawner_0.GetClosestZone(validSpawnLocations[0].Position, out float _);
-                    __instance.Float_1 = Time.time;
-                    __instance.WildSpawnType_0 = wave.BossType;
-                    __instance.BotZone_1 = botZone;
+                        __instance._spawner.GetClosestZone(validSpawnLocations[0].Position, out float _);
+                    __instance._lastTimeSpawnedBoss = Time.time;
+                    __instance._lastBossSpan = wave.BossType;
+                    __instance._lastZone = botZone;
 
                     if (creationData.SpawnStopped)
                     {
@@ -139,7 +139,7 @@ internal class PmcSpawnHookPatch : ModulePatch
         var validSpawnPoints = new List<ISpawnPoint>();
 
         var list = Utility.PlayerSpawnPoints;
-        list = list.OrderBy(_ => GClass856.Random(0f, 1f)).ToList();
+        list = list.OrderBy(_ => MyExtensions.Random(0f, 1f)).ToList();
 
         var foundInitialPoint = false;
 
@@ -187,7 +187,7 @@ internal class PmcSpawnHookPatch : ModulePatch
         ISpawnPoint firstPoint = null;
 
         var alternativeList = backupToPlayer ? Utility.BackupPlayerSpawnPoints : Utility.CombinedSpawnPoints;
-        alternativeList = alternativeList.OrderBy(_ => GClass856.Random(0f, 1f)).ToList();
+        alternativeList = alternativeList.OrderBy(_ => MyExtensions.Random(0f, 1f)).ToList();
 
         foreach (var checkPoint in alternativeList)
         {

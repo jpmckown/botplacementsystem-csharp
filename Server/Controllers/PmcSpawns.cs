@@ -8,6 +8,8 @@ using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace BotPlacementSystemServer.Controllers;
 
+using SPTarkov.Common.Models.Logging;
+
 [Injectable]
 public class PmcSpawns(
     ISptLogger<PmcSpawns> logger,

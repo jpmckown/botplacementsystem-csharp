@@ -25,7 +25,7 @@ internal class BotsControllerInitPatch : ModulePatch
             if (Plugin.DebugLogging)
                 Plugin.LogSource.LogInfo($"Resetting Cached Client Data");
                 
-            Utility.InitializeSpawnPoints(__instance.BotSpawner.AllBotZones);
+            Utility.InitializeSpawnPoints(__instance.BotSpawner._allBotZones);
         }
             
             
@@ -36,7 +36,7 @@ internal class BotsControllerInitPatch : ModulePatch
             if (Plugin.DebugLogging)
                 Plugin.LogSource.LogInfo($"Resetting PmcGroupSpawner");
                 
-            PmcGroupSpawner.InitializePmcSpawner(__instance.BotSpawner.BossSpawner, __instance.BotSpawner, __instance.BotSpawner.BotCreator);
+            _ = PmcGroupSpawner.InitializePmcSpawner(__instance.BotSpawner.BossSpawner, __instance.BotSpawner, __instance.BotSpawner._botCreator);
         }
     }
 }

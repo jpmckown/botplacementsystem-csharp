@@ -18,7 +18,7 @@ internal class IsPlayerEnemyPatch : ModulePatch
     {
         if (player.IsAI && player.Profile.Info.Settings.Role is WildSpawnType.pmcBEAR or WildSpawnType.pmcUSEC)
         {
-            var leaderId = __instance.InitialBot.Profile.ProfileId;
+            var leaderId = __instance._initialBot.Profile.ProfileId;
             var thisBotId = player.Profile.ProfileId;
             
             // Check our group mappings - as we spawn bots faster than the group manager can assign groups and handle them
@@ -31,7 +31,7 @@ internal class IsPlayerEnemyPatch : ModulePatch
                 }
             }
             
-            if (__instance.InitialBot.BotsGroup.Contains(player.AIData.BotOwner))
+            if (__instance._initialBot.BotsGroup.Contains(player.AIData.BotOwner))
             {
                 __result = false;
                 return false;

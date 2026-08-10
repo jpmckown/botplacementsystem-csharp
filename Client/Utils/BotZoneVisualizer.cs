@@ -14,7 +14,7 @@ public class BotZoneVisualizer : MonoBehaviour
         if (Plugin.BotSpawnerInstance is not null)
         {
             Plugin.LogSource.LogInfo("BotSpawner was not null - trying to visualize botzones");
-            _botZones = Plugin.BotSpawnerInstance.AllBotZones.ToList();
+            _botZones = Plugin.BotSpawnerInstance._allBotZones.ToList();
 
             foreach (var botZone in _botZones)
             {

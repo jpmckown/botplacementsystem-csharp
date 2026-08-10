@@ -2,20 +2,26 @@
 using BotPlacementSystemServer.Controllers;
 using HarmonyLib;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.Constants;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Models.Common;
 using SPTarkov.Server.Core.Models.Eft.Common;
-using SPTarkov.Server.Core.Models.Eft.Common.Tables;
-using SPTarkov.Server.Core.Models.Enums;
 using SPTarkov.Server.Core.Models.Spt.Location;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Services;
 
 namespace BotPlacementSystemServer.Patches;
 
-public class AdjustWaves_Patch : AbstractPatch
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.InRaid;
+
+[Injectable]
+public class AdjustWavesPatch : AbstractPatch
 {
+    private static PmcSpawns _pmcSpawns = null!;
+    private static ScavSpawns _scavSpawns = null!;
+
+    public AdjustWavesPatch(PmcSpawns pmcSpawns, ScavSpawns scavSpawns)
+    {
+        _pmcSpawns = pmcSpawns;
+        _scavSpawns = scavSpawns;
+    }
+    
     protected override MethodBase GetTargetMethod()
     {
         return AccessTools.Method(typeof(RaidTimeAdjustmentService),"AdjustWaves");
@@ -24,9 +30,6 @@ public class AdjustWaves_Patch : AbstractPatch
     [PatchPrefix]
     public static bool Prefix(LocationBase mapBase, RaidChanges raidAdjustments)
     {
-        var pmcSpawns = ServiceLocator.ServiceProvider.GetService<PmcSpawns>();
-        var scavSpawns = ServiceLocator.ServiceProvider.GetService<ScavSpawns>();
-        
         var locationName = mapBase.Id.ToLowerInvariant();
 
         var simulatedStart = raidAdjustments.SimulatedRaidStartSeconds ?? 0d;
@@ -40,13 +43,13 @@ public class AdjustWaves_Patch : AbstractPatch
                             && !string.Equals(x.BossName, "pmcBEAR", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            var newPmcs = pmcSpawns.GenerateScavRaidRemainingPmcs(locationName, totalRaidSeconds);
+            var newPmcs = _pmcSpawns.GenerateScavRaidRemainingPmcs(locationName, totalRaidSeconds);
             mapBase.BossLocationSpawn = newPmcs;
 
             foreach (var boss in mapBosses)
                 mapBase.BossLocationSpawn.Add(boss);
 
-            mapBase.Waves = scavSpawns.GetLateStartMapData(locationName, totalRaidSeconds);
+            mapBase.Waves = _scavSpawns.GetLateStartMapData(locationName, totalRaidSeconds);
         }
 
         return false;

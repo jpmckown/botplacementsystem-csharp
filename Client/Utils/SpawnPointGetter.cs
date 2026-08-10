@@ -8,6 +8,8 @@ using UnityEngine;
 
 namespace BotPlacementSystemClient.Utils;
 
+using EFT.CameraControl;
+
 public class SpawnPointGetter : MonoBehaviour
 {
     private List<SpawnPointMarker> _spawnPointMarkers = [];
@@ -38,11 +40,11 @@ public class SpawnPointGetter : MonoBehaviour
     private void Awake()
     {
         // If DLSS or FSR are enabled, set a screen scale value
-        if (CameraClass.Instance.SSAA.isActiveAndEnabled)
+        if (CameraManager.Instance.SSAA.isActiveAndEnabled)
         {
             _screenScale =
-                (float)CameraClass.Instance.SSAA.GetOutputWidth()
-                / (float)CameraClass.Instance.SSAA.GetInputWidth();
+                (float)CameraManager.Instance.SSAA.GetOutputWidth()
+                / (float)CameraManager.Instance.SSAA.GetInputWidth();
             // Plugin.Log.LogDebug($"DLSS or FSR is enabled, scale screen offsets by {_screenScale}");
         }
 

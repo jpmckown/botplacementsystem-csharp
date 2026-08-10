@@ -8,6 +8,8 @@ using SPT.Common.Http;
 
 namespace BotPlacementSystemClient.Spawning;
 
+using EFT.Communications;
+
 public class BossSpawnTracking
 {
     private static Dictionary<string, CustomizedObject> BossInfoOutOfRaid { get; set; } = [];
@@ -77,7 +79,7 @@ public class BossSpawnTracking
         catch (Exception ex)
         {
             Plugin.LogSource.LogError("Failed to save: " + ex.ToString());
-            NotificationManagerClass.DisplayWarningNotification("Failed to save ABPS Progressive Boss data - check the server");
+            NotificationManager.DisplayWarningNotification("Failed to save ABPS Progressive Boss data - check the server");
         }
     }
 
@@ -96,7 +98,7 @@ public class BossSpawnTracking
         catch (Exception ex)
         {
             Plugin.LogSource.LogError("Failed to load: " + ex.ToString());
-            NotificationManagerClass.DisplayWarningNotification("Failed to load ABPS Progressive Boss data - check the server");
+            NotificationManager.DisplayWarningNotification("Failed to load ABPS Progressive Boss data - check the server");
         }
     }
 

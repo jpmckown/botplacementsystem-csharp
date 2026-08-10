@@ -13,12 +13,15 @@ using SPTarkov.Server.Core.Utils;
 
 namespace BotPlacementSystemServer.Globals;
 
-[Injectable (InjectionType.Singleton, TypePriority = OnLoadOrder.PreSptModLoader)]
+using SPTarkov.Common.Models.Logging;
+using SPTarkov.Server.Core.Helpers.Server;
+
+[Injectable (InjectionType.Singleton, TypePriority = OnLoadOrder.Preload)]
 public class ModConfig : IOnLoad
 {
-    private static JsonUtil _jsonUtil;
-    private static FileUtil _fileUtil;
-    private static ISptLogger<ModConfig> _logger;
+    private static JsonUtil _jsonUtil = null!;
+    private static FileUtil _fileUtil = null!;
+    private static ISptLogger<ModConfig> _logger = null!;
     
     public static MapZoneDefaults? MapZoneDefaults { get; private set; }
     public static BossWaveDefaults? BossWaveDefaults { get; private set; }
@@ -30,7 +33,7 @@ public class ModConfig : IOnLoad
     
     private static int _isActivelyProcessingFlag = 0;
     
-    public static string? _modPath;
+    public static string? _modPath = null!;
     
     public static event Action? ConfigChanged;
 
@@ -46,7 +49,7 @@ public class ModConfig : IOnLoad
         _logger = logger;
     }
     
-    public async Task OnLoad()
+    public async Task OnLoadAsync(CancellationToken token)
     {
         var configPath = Path.Combine(_modPath, "config.json");
         var defaultConfigPath = Path.Combine(_modPath, "Defaults", "config.default.json");
@@ -56,8 +59,8 @@ public class ModConfig : IOnLoad
             File.Copy(defaultConfigPath, configPath);
         }
         
-        var rawConfig = await _fileUtil.ReadFileAsync(configPath);
-        var rawDefaultConfig = await _fileUtil.ReadFileAsync(defaultConfigPath);
+        var rawConfig = await _fileUtil.ReadFileAsync(configPath, token);
+        var rawDefaultConfig = await _fileUtil.ReadFileAsync(defaultConfigPath, token);
         
         Config = _jsonUtil.Deserialize<AbpsConfig>(rawConfig) ?? throw new ArgumentNullException();
         
@@ -69,14 +72,14 @@ public class ModConfig : IOnLoad
         
         OriginalConfig = DeepClone(Config);
         
-        MapZoneDefaults = await _jsonUtil.DeserializeFromFileAsync<MapZoneDefaults>(_modPath + "/Defaults/MapZones.json") ?? throw new ArgumentNullException();
-        BossWaveDefaults = await _jsonUtil.DeserializeFromFileAsync<BossWaveDefaults>(_modPath + "/Defaults/Bosses.json") ?? throw new ArgumentNullException();
-        PmcDefaults = await _jsonUtil.DeserializeFromFileAsync<PmcDefaults>(_modPath + "/Defaults/PMCs.json") ?? throw new ArgumentNullException();
-        ScavDefaults = await _jsonUtil.DeserializeFromFileAsync<ScavDefaults>(_modPath + "/Defaults/Scavs.json") ?? throw new ArgumentNullException();
-        HostilityDefaults = await _jsonUtil.DeserializeFromFileAsync<HostilityDefaults>(_modPath + "/Defaults/Hostility.json") ?? throw new ArgumentNullException();
+        MapZoneDefaults = await _jsonUtil.DeserializeFromFileAsync<MapZoneDefaults>(_modPath + "/Defaults/MapZones.json", token) ?? throw new ArgumentNullException();
+        BossWaveDefaults = await _jsonUtil.DeserializeFromFileAsync<BossWaveDefaults>(_modPath + "/Defaults/Bosses.json", token) ?? throw new ArgumentNullException();
+        PmcDefaults = await _jsonUtil.DeserializeFromFileAsync<PmcDefaults>(_modPath + "/Defaults/PMCs.json", token) ?? throw new ArgumentNullException();
+        ScavDefaults = await _jsonUtil.DeserializeFromFileAsync<ScavDefaults>(_modPath + "/Defaults/Scavs.json", token) ?? throw new ArgumentNullException();
+        HostilityDefaults = await _jsonUtil.DeserializeFromFileAsync<HostilityDefaults>(_modPath + "/Defaults/Hostility.json", token) ?? throw new ArgumentNullException();
     }
     
-    public static async Task<ConfigOperationResult> ReloadConfig()
+    public static async Task<ConfigOperationResult> ReloadConfig(CancellationToken token = default)
     {
         if (Interlocked.CompareExchange(ref _isActivelyProcessingFlag, 1, 0) != 0)
             return ConfigOperationResult.ActiveProcess;
@@ -84,7 +87,7 @@ public class ModConfig : IOnLoad
         try
         {
             var configPath = Path.Combine(_modPath, "config.json");
-            var configTask = _jsonUtil.DeserializeFromFileAsync<AbpsConfig>(configPath);
+            var configTask = _jsonUtil.DeserializeFromFileAsync<AbpsConfig>(configPath, token);
 
             await Task.WhenAll(configTask);
 
@@ -105,7 +108,7 @@ public class ModConfig : IOnLoad
         }
     }
     
-    public static async Task<ConfigOperationResult> SaveConfig()
+    public static async Task<ConfigOperationResult> SaveConfig(CancellationToken token = default)
     {
         if (Interlocked.CompareExchange(ref _isActivelyProcessingFlag, 1, 0) != 0)
             return ConfigOperationResult.ActiveProcess;
@@ -117,7 +120,7 @@ public class ModConfig : IOnLoad
             var serializedConfigTask = Task.Run(() => _jsonUtil.Serialize(Config, true));
             await Task.WhenAll(serializedConfigTask);
 
-            var writeConfigTask = _fileUtil.WriteFileAsync(configPath, serializedConfigTask.Result!);
+            var writeConfigTask = _fileUtil.WriteFileAsync(configPath, serializedConfigTask.Result!, token);
             await Task.WhenAll(writeConfigTask);
 
             ConfigChanged?.Invoke();

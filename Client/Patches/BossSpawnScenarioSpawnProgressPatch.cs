@@ -11,7 +11,7 @@ internal class BossSpawnScenarioSpawnProgressPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(BossSpawnScenario), nameof(BossSpawnScenario.smethod_0));
+        return AccessTools.Method(typeof(BossSpawnScenario), nameof(BossSpawnScenario.Create));
     }
 
     [PatchPrefix]

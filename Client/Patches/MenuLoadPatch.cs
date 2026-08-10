@@ -10,13 +10,15 @@ using SPT.Reflection.Utils;
 
 namespace BotPlacementSystemClient.Patches;
 
+using EFT;
+
 public class MenuLoadPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
         Type type = PatchConstants.EftTypes.Single(
             t => !t.IsAbstract &&
-                 typeof(ProfileEndpointFactoryAbstractClass).IsAssignableFrom(t) &&
+                 typeof(ClientBackendSession).IsAssignableFrom(t) &&
                  t.GetMethod("RequestBuilds") != null);
         return AccessTools.Method(type, "RequestBuilds");
     }
@@ -25,6 +27,6 @@ public class MenuLoadPatch : ModulePatch
     public static async void Postfix(Task<IResult> __result)
     {
         await __result;
-        BossSpawnTracking.LoadFromServer();
+        await BossSpawnTracking.LoadFromServer();
     }
 }

@@ -1,11 +1,12 @@
 ﻿using System.Reflection;
 using HarmonyLib;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.Services;
 
 namespace BotPlacementSystemServer.Patches;
 
-public class ReplaceBotHostility_Patch: AbstractPatch
+using SPTarkov.Server.Core.Services.Server;
+
+public class ReplaceBotHostilityPatch: AbstractPatch
 {
     protected override MethodBase GetTargetMethod()
     {

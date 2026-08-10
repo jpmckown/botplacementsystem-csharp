@@ -4,14 +4,17 @@ using SPTarkov.Server.Core.DI;
 
 namespace BotPlacementSystemServer;
 
-[Injectable(TypePriority = OnLoadOrder.PreSptModLoader + 50)]
-public class PatchManager() : IOnLoad
+using SPTarkov.Reflection.Patching;
+
+[Injectable(TypePriority = OnLoadOrder.Preload)]
+public class PatchManager(IEnumerable<IRuntimePatch> patches) : IOnLoad
 {
-    public Task OnLoad()
+    public Task OnLoadAsync(CancellationToken token)
     {
-        new AdjustWaves_Patch().Enable();
-        new AdjustPmcSpawns_Patch().Enable();
-        new ReplaceBotHostility_Patch().Enable();
+        foreach (var patch in patches)
+        {
+            patch.Enable();
+        }
         
         return Task.CompletedTask;
     }

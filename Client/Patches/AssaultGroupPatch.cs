@@ -9,11 +9,11 @@ internal class AssaultGroupPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(ProfileInfoSettingsClass), nameof(ProfileInfoSettingsClass.TryChangeRoleToAssaultGroup));
+        return AccessTools.Method(typeof(ProfileSettings), nameof(ProfileSettings.TryChangeRoleToAssaultGroup));
     }
 
     [PatchPrefix]
-    private static bool PatchPrefix(ProfileInfoSettingsClass __instance)
+    private static bool PatchPrefix(ProfileSettings __instance)
     {
         if(__instance.Role == WildSpawnType.assaultGroup)
         {

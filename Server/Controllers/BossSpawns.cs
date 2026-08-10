@@ -4,12 +4,12 @@ using SPTarkov.Server.Core.Extensions;
 using SPTarkov.Server.Core.Helpers;
 using SPTarkov.Server.Core.Models.Eft.Common;
 using SPTarkov.Server.Core.Models.Spt.Config;
-using SPTarkov.Server.Core.Models.Utils;
-using SPTarkov.Server.Core.Servers;
 using SPTarkov.Server.Core.Utils;
 using SPTarkov.Server.Core.Utils.Cloners;
 
 namespace BotPlacementSystemServer.Controllers;
+
+using SPTarkov.Common.Models.Logging;
 
 [Injectable]
 public class BossSpawns(
@@ -17,10 +17,8 @@ public class BossSpawns(
     ICloner cloner,
     WeightedRandomHelper weightedRandomHelper,
     RandomUtil randomUtil,
-    ConfigServer configServer)
+    BotConfig botConfig)
 {
-    private readonly BotConfig _botConfig = configServer.GetConfig<BotConfig>();
-
     public List<BossLocationSpawn> GetCustomMapData(string location, double escapeTimeLimit)
     {
         return GetConfigValueForLocation(location, escapeTimeLimit);
@@ -100,7 +98,7 @@ public class BossSpawns(
 
     private bool IsWeeklyBoss(WildSpawnType bossType)
     {
-        var bossList = _botConfig.WeeklyBoss.BossPool;
+        var bossList = botConfig.WeeklyBoss.BossPool;
         var startOfWeek = DateTime.Today.GetMostRecentPreviousDay(DayOfWeek.Monday);
 
         var seed = startOfWeek.Year * 1000 + startOfWeek.DayOfYear;

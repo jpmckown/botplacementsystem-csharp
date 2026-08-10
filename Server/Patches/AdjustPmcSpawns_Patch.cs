@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
-using BotPlacementSystemServer.Controllers;
 using HarmonyLib;
 using SPTarkov.Reflection.Patching;
-using SPTarkov.Server.Core.DI;
-using SPTarkov.Server.Core.Models.Eft.Common;
-using SPTarkov.Server.Core.Models.Spt.Location;
-using SPTarkov.Server.Core.Services;
 
 namespace BotPlacementSystemServer.Patches;
 
-public class AdjustPmcSpawns_Patch: AbstractPatch
+using SPTarkov.DI.Annotations;
+using SPTarkov.Server.Core.Services.InRaid;
+
+[Injectable]
+public class AdjustPmcSpawnsPatch: AbstractPatch
 {
     protected override MethodBase GetTargetMethod()
     {

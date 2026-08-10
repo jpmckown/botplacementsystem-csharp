@@ -39,14 +39,14 @@ internal class SetMaxBotCountPatch : ModulePatch
         };
 
         Plugin.LogSource.LogInfo($"[ABPS] Setting max bots to {maxCount} on {location.ToLowerInvariant()}");
-        __instance.MaxCount = maxCount;
+        __instance._maxCount = maxCount;
 
         if (__instance.BotSpawner == null)
         {
             return;
         }
             
-        __instance.BotSpawner.SetMaxBots(__instance.MaxCount);
-        __instance.ZonesLeaveController.SetMaxBots(__instance.MaxCount);
+        __instance.BotSpawner.SetMaxBots(__instance._maxCount);
+        __instance.ZonesLeaveController.SetMaxBots(__instance._maxCount);
     }
 }
